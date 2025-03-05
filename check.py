@@ -5,8 +5,24 @@ import codecs
 import requests
 import os
 import time
+import json
 from pyquery import PyQuery as pq
 
+# 读取配置文件
+def load_config():
+    try:
+        with open('config.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"读取配置文件失败: {e}")
+        # 返回默认配置
+        return {
+            "languages": ["python"],
+            "auto_push": True,
+            "update_frequency": "daily",
+            "max_repos_per_language": 10,
+            "file_format": "markdown"
+        }
 
 def git_add_commit_push(date, filename):
     cmd_git_add = 'git add {filename}'.format(filename=filename)
@@ -19,8 +35,11 @@ def git_add_commit_push(date, filename):
 
 
 def createMarkdown(date, filename):
-    with open(filename, 'w') as f:
-        f.write("## " + date + "\n")
+    if os.path.exists(filename):
+        pass
+    else:
+        with open(filename, 'w') as f:
+            f.write("## " + date + "\n")
 
 
 def scrape(language, filename):
@@ -38,37 +57,53 @@ def scrape(language, filename):
     d = pq(r.content)
     items = d('div.Box article.Box-row')
 
+    # 获取配置中的最大仓库数量
+    config = load_config()
+    max_repos = config.get("max_repos_per_language", 10)
+
     # codecs to solve the problem utf-8 codec like chinese
     with codecs.open(filename, "a", "utf-8") as f:
         f.write('\n#### {language}\n'.format(language=language))
 
-        for item in items:
+        for i, item in enumerate(items):
+            if i >= max_repos:
+                break
+                
             i = pq(item)
             title = i(".lh-condensed a").text()
             owner = i(".lh-condensed span.text-normal").text()
             description = i("p.col-9").text()
             url = i(".lh-condensed a").attr("href")
-            url = "https://github.com" + url
-            # ownerImg = i("p.repo-list-meta a img").attr("src")
-            # print(ownerImg)
+
             f.write(u"* [{title}]({url}):{description}\n".format(title=title, url=url, description=description))
 
 
 def job():
+    # 加载配置
+    config = load_config()
+    languages = config.get("languages", ["python"])
+    auto_push = config.get("auto_push", True)
+    
     strdate = datetime.datetime.now().strftime('%Y-%m-%d')
     filename = '{date}.md'.format(date=strdate)
 
     # create markdown file
     createMarkdown(strdate, filename)
 
-    # write markdown
-    scrape('python', filename)
-    scrape('swift', filename)
-    scrape('javascript', filename)
-    scrape('go', filename)
+    # 遍历配置的所有语言进行抓取
+    for language in languages:
+        try:
+            scrape(language, filename)
+            print(f"成功抓取 {language} 语言的trending项目")
+        except Exception as e:
+            print(f"抓取 {language} 语言时出错: {e}")
 
     # git add commit push
-    # git_add_commit_push(strdate, filename)
+    if auto_push:
+        git_add_commit_push(strdate, filename)
+        print(f"已自动提交并推送到Git仓库")
+    else:
+        print(f"已生成文件 {filename}，但未推送到Git仓库")
 
 
 if __name__ == '__main__':
