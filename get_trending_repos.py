@@ -86,6 +86,128 @@ def send_email(date, filename):
         with open(filename, 'r', encoding='utf-8') as f:
             content = f.read()
         
+        # 将Markdown转换为HTML
+        try:
+            import markdown
+            html_content = markdown.markdown(content)
+        except ImportError:
+            # 如果没有安装markdown库，进行简单的转换
+            html_content = content.replace('\n', '<br>')
+            html_content = html_content.replace('# ', '<h1>')
+            html_content = html_content.replace('## ', '<h2>')
+            html_content = html_content.replace('* ', '<li>')
+            html_content = f'<html><body>{html_content}</body></html>'
+        
+        # 添加CSS样式，美化邮件内容
+        css_style = """
+        <style>
+            body {
+                font-family: 'Segoe UI', Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f9f9f9;
+            }
+            h1 {
+                color: #2c3e50;
+                border-bottom: 2px solid #3498db;
+                padding-bottom: 10px;
+                font-size: 24px;
+                text-align: center;
+            }
+            h2 {
+                color: #2980b9;
+                border-left: 4px solid #3498db;
+                padding-left: 10px;
+                margin-top: 30px;
+                font-size: 20px;
+                background-color: #eef7fa;
+                padding: 8px 10px;
+                border-radius: 3px;
+            }
+            ul {
+                list-style-type: none;
+                padding-left: 0;
+            }
+            li {
+                margin-bottom: 20px;
+                padding: 15px;
+                background-color: #fff;
+                border-radius: 5px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                transition: transform 0.2s;
+            }
+            li:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+            a {
+                color: #3498db;
+                text-decoration: none;
+                font-weight: bold;
+                font-size: 16px;
+            }
+            a:hover {
+                text-decoration: underline;
+            }
+            .stars {
+                color: #f39c12;
+                font-weight: bold;
+                margin-left: 5px;
+            }
+            .description {
+                color: #555;
+                margin-top: 8px;
+                padding-left: 10px;
+                border-left: 3px solid #eee;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+            .footer {
+                margin-top: 30px;
+                text-align: center;
+                font-size: 12px;
+                color: #7f8c8d;
+                border-top: 1px solid #ddd;
+                padding-top: 10px;
+            }
+        </style>
+        """
+        
+        # 处理HTML内容，添加样式和结构
+        # 替换星星标记为带样式的星星
+        html_content = html_content.replace('⭐', '<span class="stars">⭐</span>')
+        
+        # 为描述添加样式
+        import re
+        # 更新正则表达式以匹配新的markdown格式
+        html_content = re.sub(r'(<li>.*?</a>.*?</span>)(.*?)(?=<li>|<\/ul>|$)', 
+                             r'\1<div class="description">\2</div>', 
+                             html_content)
+        
+        # 添加页脚
+        footer = f"""
+        <div class="footer">
+            GitHub Trending 日报 - {date} - 自动生成
+        </div>
+        """
+        
+        # 组合完整的HTML
+        full_html = f"""
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            {css_style}
+        </head>
+        <body>
+            {html_content}
+            {footer}
+        </body>
+        </html>
+        """
+        
         # 创建邮件对象
         message = MIMEMultipart()
         message['From'] = sender  # 简化From头部，只使用邮箱地址
@@ -93,8 +215,8 @@ def send_email(date, filename):
         subject = f'GitHub Trending 日报 ({date})'
         message['Subject'] = Header(subject, 'utf-8')
         
-        # 添加邮件正文
-        message.attach(MIMEText(content, 'markdown', 'utf-8'))
+        # 添加邮件正文（使用HTML格式）
+        message.attach(MIMEText(full_html, 'html', 'utf-8'))
         
         # 发送邮件
         if smtp_port == 465:
@@ -196,13 +318,18 @@ def get_trending_repos(language, filename):
     # 写入文件
     with codecs.open(filename, "a", "utf-8") as f:
         f.write('\n## {language}\n'.format(language=language))
+        f.write('\n')  # 添加空行，使格式更规范
         
         for project in sorted_projects:
-            f.write(u"* [{title}]({url}) ⭐{stars} - {description}\n".format(
+            # 确保描述不为空
+            description = project['description'] if project['description'] else "无描述"
+            
+            # 格式化输出，使其更加规范
+            f.write(u"* [{title}]({url}) ⭐ {stars}\n  {description}\n\n".format(
                 title=project['title'], 
                 url=project['url'], 
                 stars=project['stars_text'], 
-                description=project['description']
+                description=description
             ))
 
 
