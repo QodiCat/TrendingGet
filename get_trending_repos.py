@@ -39,7 +39,7 @@ def create_markdown(date, filename):
         pass
     else:
         with open(filename, 'w') as f:
-            f.write("## " + date + "\n")
+            f.write("# " + date + "\n")
 
 
 def get_trending_repos(language, filename):
@@ -121,7 +121,7 @@ def get_trending_repos(language, filename):
     
     # 写入文件
     with codecs.open(filename, "a", "utf-8") as f:
-        f.write('\n#### {language}\n'.format(language=language))
+        f.write('\n## {language}\n'.format(language=language))
         
         for project in sorted_projects:
             f.write(u"* [{title}]({url}) ⭐{stars} - {description}\n".format(
@@ -139,7 +139,7 @@ def start():
     auto_push = config.get("auto_push", True)
     
     strdate = datetime.datetime.now().strftime('%Y-%m-%d')
-    filename = '{date}.md'.format(date=strdate)
+    filename = 'repos_data/{date}.md'.format(date=strdate)
 
     # create markdown file
     create_markdown(strdate, filename)
