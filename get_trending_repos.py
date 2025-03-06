@@ -7,7 +7,11 @@ import os
 import time
 import json
 from pyquery import PyQuery as pq
-
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.header import Header
+from secret import email_password
 # 读取配置文件
 def load_config():
     try:
@@ -21,7 +25,15 @@ def load_config():
             "auto_push": True,
             "update_frequency": "daily",
             "max_repos_per_language": 10,
-            "file_format": "markdown"
+            "file_format": "markdown",
+            "email": {
+                "enable": False,
+                "sender": "",
+                "password": "",
+                "receiver": "",
+                "smtp_server": "",
+                "smtp_port": 465
+            }
         }
 
 def git_add_commit_push(date, filename):
@@ -40,6 +52,68 @@ def create_markdown(date, filename):
     else:
         with open(filename, 'w') as f:
             f.write("# " + date + "\n")
+
+def send_email(date, filename):
+    """
+    发送邮件功能
+    :param date: 日期
+    :param filename: 文件名
+    :return: 是否发送成功
+    """
+    # 读取配置
+    config = load_config()
+    email_config = config.get("email", {})
+    
+    # 检查是否启用邮件功能
+    if not email_config.get("enable", False):
+        print("邮件发送功能未启用")
+        return False
+    
+    # 获取邮件配置
+    sender = email_config.get("sender", "")
+    password = email_password
+    receiver = email_config.get("receiver", "")
+    smtp_server = email_config.get("smtp_server", "")
+    smtp_port = email_config.get("smtp_port", 465)
+    
+    # 检查配置是否完整
+    if not all([sender, password, receiver, smtp_server]):
+        print("邮件配置不完整，无法发送邮件")
+        return False
+    
+    try:
+        # 读取文件内容
+        with open(filename, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # 创建邮件对象
+        message = MIMEMultipart()
+        message['From'] = sender  # 简化From头部，只使用邮箱地址
+        message['To'] = receiver
+        subject = f'GitHub Trending 日报 ({date})'
+        message['Subject'] = Header(subject, 'utf-8')
+        
+        # 添加邮件正文
+        message.attach(MIMEText(content, 'markdown', 'utf-8'))
+        
+        # 发送邮件
+        if smtp_port == 465:
+            # SSL连接
+            smtp = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        else:
+            # 普通连接
+            smtp = smtplib.SMTP(smtp_server, smtp_port)
+            smtp.starttls()  # 启用TLS加密
+            
+        smtp.login(sender, password)
+        smtp.sendmail(sender, receiver, message.as_string())
+        smtp.quit()
+        
+        print(f"邮件已成功发送到 {receiver}")
+        return True
+    except Exception as e:
+        print(f"发送邮件时出错: {e}")
+        return False
 
 
 def get_trending_repos(language, filename):
@@ -152,6 +226,11 @@ def start():
         except Exception as e:
             print(f"抓取 {language} 语言时出错: {e}")
 
+    # 发送邮件
+    email_config = config.get("email", {})
+    if email_config.get("enable", False):
+        send_email(strdate, filename)
+    
     #git add commit push
     if auto_push:
         git_add_commit_push(strdate, filename)

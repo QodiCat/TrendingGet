@@ -9,5 +9,12 @@
   "proxy":{
     "http": "http://127.0.0.1:7890",
     "https": "http://127.0.0.1:7890"
+  },
+  "email": {
+    "enable": true,
+    "sender": "1357016290@qq.com",
+    "receiver": "1357016290@qq.com",
+    "smtp_server": "smtp.qq.com",
+    "smtp_port": 465
   }
 }
