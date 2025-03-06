@@ -34,7 +34,7 @@ def git_add_commit_push(date, filename):
     os.system(cmd_git_push)
 
 
-def createMarkdown(date, filename):
+def create_markdown(date, filename):
     if os.path.exists(filename):
         pass
     else:
@@ -42,7 +42,7 @@ def createMarkdown(date, filename):
             f.write("## " + date + "\n")
 
 
-def scrape(language, filename):
+def get_trending_repos(language, filename):
     HEADERS = {
         'User-Agent'		: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.7; rv:11.0) Gecko/20100101 Firefox/11.0',
         'Accept'			: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -132,7 +132,7 @@ def scrape(language, filename):
             ))
 
 
-def job():
+def start():
     # 加载配置
     config = load_config()
     languages = config.get("languages", ["python"])
@@ -142,12 +142,12 @@ def job():
     filename = '{date}.md'.format(date=strdate)
 
     # create markdown file
-    createMarkdown(strdate, filename)
+    create_markdown(strdate, filename)
 
     # 遍历配置的所有语言进行抓取
     for language in languages:
         try:
-            scrape(language, filename)
+            get_trending_repos(language, filename)
             print(f"成功抓取 {language} 语言的trending项目")
         except Exception as e:
             print(f"抓取 {language} 语言时出错: {e}")
@@ -161,4 +161,4 @@ def job():
 
 
 if __name__ == '__main__':
-    job()
+    start()
