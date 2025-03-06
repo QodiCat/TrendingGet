@@ -152,12 +152,12 @@ def job():
         except Exception as e:
             print(f"抓取 {language} 语言时出错: {e}")
 
-    # git add commit push
-    # if auto_push:
-    #     git_add_commit_push(strdate, filename)
-    #     print(f"已自动提交并推送到Git仓库")
-    # else:
-    #     print(f"已生成文件 {filename}，但未推送到Git仓库")
+    #git add commit push
+    if auto_push:
+        git_add_commit_push(strdate, filename)
+        print(f"已自动提交并推送到Git仓库")
+    else:
+        print(f"已生成文件 {filename}，但未推送到Git仓库")
 
 
 if __name__ == '__main__':
