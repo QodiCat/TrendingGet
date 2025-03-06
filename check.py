@@ -49,10 +49,11 @@ def scrape(language, filename):
         'Accept-Encoding'	: 'gzip,deflate,sdch',
         'Accept-Language'	: 'zh-CN,zh;q=0.8'
     }
-    proxies = {
-        "http": "http://127.0.0.1:7890",
-        "https": "http://127.0.0.1:7890"
-    }
+        # 获取配置中的最大仓库数量
+    config = load_config()
+    max_repos = config.get("max_repos_per_language", 10)
+    proxies = config.get("proxy", {})
+    
     url = 'https://github.com/trending/{language}'.format(language=language)
     r = requests.get(url, headers=HEADERS,proxies=proxies)
     assert r.status_code == 200
@@ -60,9 +61,7 @@ def scrape(language, filename):
     d = pq(r.content)
     items = d('div.Box article.Box-row')
 
-    # 获取配置中的最大仓库数量
-    config = load_config()
-    max_repos = config.get("max_repos_per_language", 10)
+
 
     # 收集所有项目信息
     projects = []

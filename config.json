@@ -5,5 +5,9 @@
   "auto_push": true,
   "update_frequency": "daily",
   "max_repos_per_language": 10,
-  "file_format": "markdown"
+  "file_format": "markdown",
+  "proxy":{
+    "http": "http://127.0.0.1:7890",
+    "https": "http://127.0.0.1:7890"
+  }
 }
