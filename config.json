@@ -2,7 +2,7 @@
   "languages": [
     "python"
   ],
-  "auto_push": false,
+  "auto_push": true,
   "update_frequency": "daily",
   "max_repos_per_language": 10,
   "file_format": "markdown",
