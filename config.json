@@ -1,7 +1,10 @@
 {
   "languages": [
-
-    "golang"
+    "python",
+    "golang",
+    "javascript",
+    "typescript",
+    "java"
   ],
   "auto_push": true,
   "update_frequency": "daily",
