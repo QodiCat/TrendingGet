@@ -8,3 +8,7 @@ https://github.com/HKUDS/LightRAG.git  轻量级和快速的RAG系统
 
 
 https://github.com/vanna-ai/vanna  Chat with your SQL database 📊. Accurate Text-to-SQL Generation via LLMs using RAG
+
+
+
+https://github.com/getzep/graphiti  实时知识图谱RAG
