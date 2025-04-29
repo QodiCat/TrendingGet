@@ -14,3 +14,6 @@ https://github.com/khoj-ai/khoj  自托管。从 Web 或您的文档中获取答
 
 
 https://github.com/langflow-ai/langflow 一个用于构建、部署和运行 AI 工作流和代理的工具。
+
+
+https://github.com/volcengine/verl  微软开源agent桌面应用使用多agent
