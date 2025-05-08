@@ -6,7 +6,7 @@
     "typescript",
     "java"
   ],
-  "auto_push": true,
+  "auto_push": false,
   "update_frequency": "daily",
   "max_repos_per_language": 10,
   "file_format": "markdown",

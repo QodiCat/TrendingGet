@@ -5,11 +5,11 @@ import codecs
 import requests
 import os
 from pyquery import PyQuery as pq
-
+from dotenv import load_dotenv
 from utils.config import load_config
 from utils.gitpush import git_add_commit_push
 from utils.emails import send_email
-
+from ai import ai_response
 def create_markdown(date, filename):
     if os.path.exists(filename):
         pass
@@ -102,15 +102,35 @@ def get_trending_repos(language, filename):
         
         for project in sorted_projects:
             # 确保描述不为空
-            description = project['description'] if project['description'] else "无描述"
+            original_description = project['description'] if project['description'] else "无描述"
+            
+            # 使用AI翻译描述并解释困难概念
+            if original_description != "无描述":
+                prompt = f"这是一个github的description，翻译成中文，注意对于某些专有名词要保留\n\n{original_description}"
+                ai_description = ai_response(prompt)
+                description = ai_description
+            else:
+                description = original_description
             
             # 格式化输出，使其更加规范
-            f.write(u"* [{title}]({url}) ⭐ {stars}\n  {description}\n\n".format(
+            f.write(u"* [{title}]({url}) ⭐ {stars}\n".format(
                 title=project['title'], 
                 url=project['url'], 
-                stars=project['stars_text'], 
-                description=description
+                stars=project['stars_text']
             ))
+            f.write(u"  {original_description}\n".format(
+                original_description=original_description
+            ))
+            
+            # 添加AI翻译和解释，使用缩进使其更易读
+            if description != original_description:
+                # 分割AI回复的多行内容并保持格式
+                ai_lines = description.strip().split('\n')
+                for line in ai_lines:
+                    f.write(u"    {line}\n".format(line=line))
+            
+            # 添加空行，使不同项目之间有更好的视觉分隔
+            f.write(u"\n")
 
 
 def start():
@@ -147,4 +167,5 @@ def start():
 
 
 if __name__ == '__main__':
+    load_dotenv()
     start()
