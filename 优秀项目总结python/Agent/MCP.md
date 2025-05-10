@@ -10,3 +10,7 @@ https://github.com/daodao97/chatmcp   ChatMCP is an AI chat client implementing 
 
 
 https://github.com/CopilotKit/open-mcp-client  
+
+
+
+https://github.com/aipotheosis-labs/aci 是一个开源平台，链接AI agent到 600+个工具，有多身份认证，直接函数调用或者MCP服务
