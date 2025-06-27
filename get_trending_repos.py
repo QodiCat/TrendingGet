@@ -106,9 +106,10 @@ def get_trending_repos(language, filename):
             
             # 使用AI翻译描述并解释困难概念
             if original_description != "无描述":
-                prompt = f"这是一个github的description，翻译成中文，注意对于某些专有名词要保留\n\n{original_description}"
+                prompt = f"请将以下GitHub项目描述翻译成中文，保持简洁，只返回翻译结果：\n\n{original_description}"
                 ai_description = ai_response(prompt)
-                description = ai_description
+                # 如果AI翻译失败（返回空字符串），使用原始描述
+                description = ai_description if ai_description.strip() else original_description
             else:
                 description = original_description
             
