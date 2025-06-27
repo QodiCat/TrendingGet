@@ -26,7 +26,7 @@ cd TrendingGet
 
 2. 安装依赖包
 ```bash
-pip install requests pyquery
+pip install -r requirements.txt
 ```
 
 ## 配置说明
@@ -52,6 +52,9 @@ pip install requests pyquery
   }
 }
 ```
+
+API 密钥和其他敏感信息请在 `secret.py` 文件中配置，示例文件 `secret_example.py` 已提供。
+
 
 ### 配置项说明
 

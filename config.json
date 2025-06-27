@@ -16,8 +16,8 @@
   },
   "email": {
     "enable": true,
-    "sender": "1357016290@qq.com",
-    "receiver": "1357016290@qq.com",
+    "sender": "youraccount@qq.com",
+    "receiver": "youraccount@qq.com",
     "smtp_server": "smtp.qq.com",
     "smtp_port": 465
   }
